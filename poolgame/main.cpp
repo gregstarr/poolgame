@@ -18,10 +18,10 @@ void setup(vector<float> & x,vector<float> & y,vector<float> & v,vector<float> &
     v.clear();
     d.clear();
 
-    float startx[] = {240.0+20*dist(generator),250.0,235.0,266.0,250.0,218.0,282.0,235.0,266.0,203.0,297.0};
-    float starty[] = {450.0,250.0,224.0,224.0,198.0,198.0,198.0,172.0,172.0,172.0,172.0};
-    float startv[] = {3.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-    float startd[] = {3*PI/2,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+    float startx[] = {220.0,540.0,567.0,567.0,593.0,593.0,593.0,620.0,620.0,620.0,620.0};
+    float starty[] = {210.0+20*dist(generator),217.0,232.0,201.0,248.0,217.0,186.0,263.0,232.0,201.0,170.0};
+    float startv[] = {6.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+    float startd[] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 
     for(int i=0;i<11;i++)
     {
@@ -39,9 +39,9 @@ void moveStones(vector<float> & x,vector<float> & y,vector<float> & v,vector<flo
         x[i]+= cos(d[i])*v[i];
         y[i]+= sin(d[i])*v[i];
         v[i]*= .996;
-        if(v[i]<.05) v[i]=0;
-        if(x[i]>485||x[i]<15) d[i]=PI-d[i];
-        if(y[i]>485||y[i]<15) d[i]=2*PI-d[i];
+        if(v[i]<.15) v[i]=0;
+        if(x[i]>732||x[i]<45) d[i]=PI-d[i];
+        if(y[i]>378||y[i]<55) d[i]=2*PI-d[i];
     }
 }
 
@@ -77,13 +77,28 @@ void checkCollision(float & x1,float & y1,float & v1,float & d1,float & x2, floa
 
 int main()
 {
-    sf::RenderWindow gamewindow(sf::VideoMode(500,500),"window",sf::Style::Default);
-    gamewindow.setFramerateLimit(80);
+    sf::RenderWindow gamewindow(sf::VideoMode(790,435),"window",sf::Style::Default);
+    gamewindow.setFramerateLimit(15);
     vector<float> x;
     vector<float> y;
     vector<float> v;
     vector<float> d;
     setup(x,y,v,d);
+    //add textures for sprites
+     sf::Texture texture1;
+    if (!texture1.loadFromFile( "pooltable.png")) {
+        return EXIT_FAILURE;
+    }
+    sf::Texture texture2;
+    if (!texture2.loadFromFile( "poolcue.png")) {
+        return EXIT_FAILURE;
+    }
+    //create sprites
+    sf::Sprite poolcue(texture2);
+    poolcue.scale(0.45,0.45); poolcue.setRotation(8); poolcue.setOrigin(500,80);
+    sf::Sprite pooltable(texture1);
+    pooltable.scale(0.5,0.5);
+
     while(gamewindow.isOpen())
     {
         sf::Event event;
@@ -94,10 +109,16 @@ int main()
             {
                 if(event.key.code==sf::Keyboard::Q) gamewindow.close();
                 if(event.key.code==sf::Keyboard::R) setup(x,y,v,d);
+                if(event.key.code==sf::Keyboard::Up) poolcue.rotate(-3);
+                if(event.key.code==sf::Keyboard::Down) poolcue.rotate(3);
             }
 
         }
         gamewindow.clear(sf::Color::White);
+        sf::Vector2i mouseposition = sf::Mouse::getPosition(gamewindow);
+        poolcue.setPosition(mouseposition.x,mouseposition.y);
+        gamewindow.draw(pooltable);
+        gamewindow.draw(poolcue);
         gamewindow.setTitle("Pool Game!");
         moveStones(x,y,v,d);
         for(int i=0;i<x.size();i++)
