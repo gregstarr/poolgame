@@ -18,12 +18,12 @@ void setup(vector<float> & x,vector<float> & y,vector<float> & v,vector<float> &
     v.clear();
     d.clear();
 
-    float startx[] = {220.0,540.0,567.0,567.0,593.0,593.0,593.0,620.0,620.0,620.0,620.0};
-    float starty[] = {210.0+20*dist(generator),217.0,232.0,201.0,248.0,217.0,186.0,263.0,232.0,201.0,170.0};
-    float startv[] = {6.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-    float startd[] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+    float startx[] = {220.0,540.0,567.0,567.0,593.0,593.0,593.0,620.0,620.0,620.0,620.0,647.0,647.0,647.0,647.0,647.0};
+    float starty[] = {210.0+20*dist(generator),217.0,232.0,201.0,248.0,217.0,186.0,263.0,232.0,201.0,170.0,279.0,248.0,217.0,186.0,155.0};
+    float startv[] = {10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+    float startd[] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 
-    for(int i=0;i<11;i++)
+    for(int i=0;i<16;i++)
     {
         x.push_back(startx[i]);
         y.push_back(starty[i]);
@@ -40,7 +40,7 @@ void moveStones(vector<float> & x,vector<float> & y,vector<float> & v,vector<flo
         y[i]+= sin(d[i])*v[i];
         v[i]*= .996;
         if(v[i]<.15) v[i]=0;
-        if(x[i]>732||x[i]<45) d[i]=PI-d[i];
+        if(x[i]>732||x[i]<60) d[i]=PI-d[i];
         if(y[i]>378||y[i]<55) d[i]=2*PI-d[i];
     }
 }
@@ -78,7 +78,7 @@ void checkCollision(float & x1,float & y1,float & v1,float & d1,float & x2, floa
 int main()
 {
     sf::RenderWindow gamewindow(sf::VideoMode(790,435),"window",sf::Style::Default);
-    gamewindow.setFramerateLimit(15);
+    gamewindow.setFramerateLimit(60);
     vector<float> x;
     vector<float> y;
     vector<float> v;
@@ -98,6 +98,8 @@ int main()
     poolcue.scale(0.45,0.45); poolcue.setRotation(8); poolcue.setOrigin(500,80);
     sf::Sprite pooltable(texture1);
     pooltable.scale(0.5,0.5);
+
+    int balltexture[] = {0,1,3,11,14,8,6,9,4,15,13,12,5,10,2,7};
 
     while(gamewindow.isOpen())
     {
@@ -126,7 +128,13 @@ int main()
             for(int j=i+1;j<x.size();j++) checkCollision(x[i],y[i],v[i],d[i],x[j],y[j],v[j],d[j]);
             sf::CircleShape circle(15);
             circle.setOrigin(15,15);
-            circle.setFillColor(sf::Color::Black);
+            sf::Texture texture;
+            if (!texture.loadFromFile( std::to_string(balltexture[i])+".png")) {
+                return EXIT_FAILURE;
+            }
+
+            if(i==0) circle.setFillColor(sf::Color::White);
+            else circle.setTexture(&texture);
             circle.setPosition(x[i],y[i]);
             gamewindow.draw(circle);
         }
