@@ -5,11 +5,32 @@
 #include <random>
 
 #define PI 3.1415
+#define RADIUS 15
 
 using namespace std;
 
 default_random_engine generator;
 uniform_real_distribution<float> dist(0.0,1.0);
+
+bool collisionCheck(float x1,float y1,float v1,float d1,float x2,float y2,float v2,float d2)
+{
+    float dsq = (x1-x2)*(x1-x2)+(y1-y2)*(y1-y2);
+    if(dsq<((2*RADIUS)*(2*RADIUS))) return false;
+    float V[] = {v1*cos(d1)-v2*cos(d2),v1*sin(d1)-v2*sin(d2)};
+    float C[] = {x2-x1,y2-y1};
+    float dot = V[0]*C[0]+V[1]*C[1];
+    if(dot<=0) return false;
+    float mag = sqrt(V[0]*V[0]+V[1]*V[1]);
+    float N[] = {V[0]/mag,V[1]/mag};
+    float D = N[0]*C[0]+N[1]*C[1];
+    float F = C[0]*C[0]+C[1]*C[1]-D*D;
+    if(F>(2*RADIUS)*(2*RADIUS)) return false;
+    float T = (2*RADIUS)*(2*RADIUS)-F;
+    float dtm = D-sqrt(T);
+    if(dtm>mag) return false;
+    return true;
+}
+
 
 void setup(vector<float> & x,vector<float> & y,vector<float> & v,vector<float> & d)
 {
@@ -59,20 +80,15 @@ void addPolar(float t1, float r1, float t2, float r2,float & tf, float & rf)
     else tf = atan(yf/xf);
     rf = sqrt(xf*xf+yf*yf);
 }
-
-void checkCollision(float & x1,float & y1,float & v1,float & d1,float & x2, float & y2, float & v2, float & d2)
+void collide(float x1,float y1,float &v1,float &d1,float x2, float y2, float &v2, float &d2)
 {
-    float distance = (x1+cos(d1)*v1-x2+cos(d2)*v2)*(x1+cos(d1)*v1-x2+cos(d2)*v2)+(y1+sin(d1)*v1-y2+sin(d2)*v2)*(y1+sin(d1)*v1-y2+sin(d2)*v2);
-    if(distance<900)
-    {
-        float angle = atan((y1-y2)/(x1-x2));
-        float xcomp1 = cos(d1-angle)*v1;
-        float xcomp2 = cos(d2-angle)*v2;
-        addPolar(angle,-1*xcomp2,d2,v2,d2,v2);
-        addPolar(angle,xcomp1,d2,v2,d2,v2);
-        addPolar(angle,-1*xcomp1,d1,v1,d1,v1);
-        addPolar(angle,xcomp2,d1,v1,d1,v1);
-    }
+    float angle = atan((y1-y2)/(x1-x2));
+    float xcomp1 = cos(d1-angle)*v1;
+    float xcomp2 = cos(d2-angle)*v2;
+    addPolar(angle,-1*xcomp2,d2,v2,d2,v2);
+    addPolar(angle,xcomp1,d2,v2,d2,v2);
+    addPolar(angle,-1*xcomp1,d1,v1,d1,v1);
+    addPolar(angle,xcomp2,d1,v1,d1,v1);
 }
 
 int main()
@@ -125,7 +141,11 @@ int main()
         moveStones(x,y,v,d);
         for(int i=0;i<x.size();i++)
         {
-            for(int j=i+1;j<x.size();j++) checkCollision(x[i],y[i],v[i],d[i],x[j],y[j],v[j],d[j]);
+            for(int j=i+1;j<x.size();j++)
+            {
+                if(collisionCheck(x[i],y[i],v[i],d[i],x[j],y[j],v[j],d[j]))
+                collide(x[i],y[i],v[i],d[i],x[j],y[j],v[j],d[j]);
+            }
             sf::CircleShape circle(15);
             circle.setOrigin(15,15);
             sf::Texture texture;
