@@ -1,0 +1,50 @@
+//Insert these two where renderwindow was declared
+sf::Time t1,t2;
+sf::Clock myclock;
+
+while(gamewindow.isOpen())
+    {
+        sf::Event event;
+        while(gamewindow.pollEvent(event))
+        {
+            if(event.type==sf::Event::Closed) gamewindow.close();
+            if(event.type==sf::Event::KeyPressed)
+            {
+                if(event.key.code==sf::Keyboard::Q) gamewindow.close();
+                if(event.key.code==sf::Keyboard::R) setup(x,y,v,d);
+            }
+
+        }
+        gamewindow.clear(sf::Color::White);
+        sf::Vector2i mouseposition = sf::Mouse::getPosition(gamewindow);
+        gamewindow.draw(pooltable);
+        float elapse;
+        if(v[0]==0){
+         float angle = atan(-1*(mouseposition.y-y[0])/(mouseposition.x-x[0]));
+         float angle2 = angle;
+         float cue_x= cos(angle);
+         float cue_y= sin(angle);
+         angle*=180/PI*-1;
+            if(mouseposition.x < x[0]){
+                cue_x*=-1;
+                cue_y*=-1;
+            }
+            else angle-=180;
+
+         poolcue.setPosition(40*cue_x+x[0],40*cue_y*-1+y[0]);
+         poolcue.setRotation(angle+8);
+
+         if(sf::Mouse::isButtonPressed(sf::Mouse::Left)){
+            t1 = myclock.getElapsedTime();
+            elapse = t1.asSeconds()-t2.asSeconds()+1;
+            poolcue.setPosition(40*elapse*cue_x+x[0],40*elapse*cue_y*-1+y[0]);
+         }else {
+            v[0]=elapse*3;
+            if(t1.asSeconds()>t2.asSeconds()) elapse =0;
+            t2 = myclock.getElapsedTime();
+            d[0] = angle*PI/180;
+         }
+         gamewindow.draw(poolcue);
+        }
+
+        gamewindow.setTitle("Pool Game!");
