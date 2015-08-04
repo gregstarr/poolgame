@@ -33,73 +33,37 @@ bool collisionCheck(float x1,float y1,float v1,float d1,float x2,float y2,float 
     return true;
 }
 
-bool wallCheck(float x,float y,float v,float &d,char &w)
+void madeball(vector<float> & x,vector<float> & y,vector<float> & v,vector<float> & d,vector<sf::Texture> &t,vector<int> &bn,int i,int&turn,bool &isStripes)
 {
-    float dlw = x-RADIUS-52;
-    float dtw = y-RADIUS-53;
-    float drw = 912-(x+RADIUS);
-    float dbw = 482-(y+RADIUS);
-    if(dlw>v&&dtw>v&&drw>v&&dbw>v) return false;
-
-    float walls[][2][2] =
-    {
-    {{52,87},{52,448}},
-    {{86,53},{457,53}},
-    {{505,53},{878,53}},
-    {{912,87},{912,448}},
-    {{505,482},{878,482}},
-    {{86,482},{457,482}}
-    };
-
-    float V[] = {v*cos(d),v*sin(d)};
-    bool hit=false;
-    for(int wall=0;wall<6;wall++)
-    {
-        float wvec[] = {walls[wall][0][0]-walls[wall][1][0],walls[wall][0][1]-walls[wall][1][1]};
-        float mag = sqrt(wvec[0]*wvec[0]+wvec[1]*wvec[1]);
-        float uvec[] = {wvec[0]/mag,wvec[1]/mag};
-        float C[] = {walls[wall][0][0]-x,walls[wall][0][1]-y};
-        float cmag2 = C[0]*C[0]+C[1]*C[1];
-        float ddp = C[0]*uvec[0]+C[1]*uvec[1];
-        float btwd = sqrt(cmag2-ddp*ddp); // ball to wall distance
-        if(wall==1||wall==2||wall==4||wall==5)
-        {
-            if(!(walls[wall][0][0]<x<walls[wall][1][0]))
-            {
-                if(wall==1||wall==5) btwd=sqrt((walls[wall][1][0]-x)*(walls[wall][1][0]-x)+(walls[wall][1][1]-y)*(walls[wall][1][1]-y));
-                else btwd=sqrt((walls[wall][0][0]-x)*(walls[wall][0][0]-x)+(walls[wall][0][1]-y)*(walls[wall][0][1]-y));
+    if(bn.size()==16){
+        if(i!=0){
+            if(bn[i]>8){
+                if((turn-1)%2) isStripes=true;
+                else isStripes=false;
+            }
+            else{
+                if((turn-1)%2)isStripes=false;
+                else isStripes=true;
             }
         }
-        if(btwd>RADIUS) continue;
-        cout<<btwd<<endl;
-        //float angle1 = atan((walls[wall][0][1]-y)/(walls[wall][0][0]-x));
-        //float angle2 = atan((walls[wall][1][1]-y)/(walls[wall][1][0]-x));
-
-        //if(angle1<0) angle1+=2*PI;
-        //if(angle2<0) angle2+=2*PI;
-        //if(d<0) d+=2*PI;
-        //cout<<angle1<<" "<<angle2<<" "<<d<<endl;
-        //if((angle1<d<angle2)||(angle2<d<angle1))
-        //{
-
-        hit = true;
-        if(wall==0||wall==3) w='x';
-        else w='y';
-        float cx[] = {55,483,907,907,483,55};
-        float cy[] = {55,45,55,480,495,480};
-        for(int i=0;i<6;i++)
-            {
-                if(sqrt((cx[i]-x)*(cx[i]-x)+(cy[i]-y)*(cy[i]-y))<RADIUS+3) w='p';
-            }
-        //}
     }
-    if(!hit) return false;
-
-    return true;
-}
-
-void madeball(vector<float> & x,vector<float> & y,vector<float> & v,vector<float> & d,vector<sf::Texture> &t,vector<int> &bn,int i)
-{
+if(i!=0){
+    if((turn-1)%2){
+        if(isStripes){
+            if(bn[i]>8) turn-=1;
+        }
+        else{
+            if(bn[i]<8) turn-=1;
+        }
+    }
+    else{
+        if(isStripes){
+            if(bn[i]<8) turn-=1;
+        }
+        else{
+            if(bn[i]>8) turn-=1;
+        }
+    }}
     if(i==0)
     {
         x[i]=200;
@@ -152,7 +116,7 @@ void moveStones(vector<float> & x,vector<float> & y,vector<float> & v,vector<flo
     {
         x[i]+= cos(d[i])*v[i];
         y[i]+= sin(d[i])*v[i];
-        v[i]-= .04;
+        v[i]-=.04;
         if(v[i]<.15) v[i]=0;
         if(x[i]>899||x[i]<67){
          if(!(y[i]>445||y[i]<90)) d[i]=PI-d[i];
@@ -177,12 +141,6 @@ void addPolar(float t1, float r1, float t2, float r2,float & tf, float & rf)
     if(xf<0) tf = PI+atan(yf/xf);
     else tf = atan(yf/xf);
     rf = sqrt(xf*xf+yf*yf);
-}
-
-void hitwall(float &d,char w)
-{
-    if(w=='x') d=PI-d;
-    if(w=='y') d*=-1;
 }
 
 void collide(float x1,float y1,float &v1,float &d1,float x2, float y2, float &v2, float &d2)
@@ -211,6 +169,7 @@ void drawCue (sf::Sprite &poolcue, sf::Vector2i mouseposition, sf::Time &t1, sf:
     poolcue.setRotation(angle+8);
 
     if(sf::Mouse::isButtonPressed(sf::Mouse::Left)){
+
         t1 = myclock.getElapsedTime();
         elapse = t1.asSeconds()-t2.asSeconds()+1;
         poolcue.setPosition(70*elapse*cue_x+x[0],70*elapse*cue_y*-1+y[0]);
@@ -223,6 +182,7 @@ void drawCue (sf::Sprite &poolcue, sf::Vector2i mouseposition, sf::Time &t1, sf:
         t2 = myclock.getElapsedTime();
         d[0] = angle*PI/180;
     }
+
 }
 
 int main()
@@ -235,8 +195,11 @@ int main()
     float elapse;
     vector<float> x;
     vector<float> y;
+    bool isStripes=false;
     vector<float> v;
     vector<float> d;
+    bool gameover = false;
+    string winner;
     vector<sf::Texture> textures;
     vector<int> bn;
     setup(x,y,v,d,textures,bn);
@@ -274,6 +237,8 @@ int main()
                 if(event.key.code==sf::Keyboard::R){
                     setup(x,y,v,d,textures,bn);
                     turn =1;
+                    text.setString("Player 1");
+                    text2.setString("Player 2");
                 }
             }
         }
@@ -283,6 +248,16 @@ int main()
         if(v[0]==0){
          drawCue(poolcue,mouseposition,t1,t2, myclock,elapse,y,x,v,d,turn);
          gamewindow.draw(poolcue);
+        }
+        if(bn.size()<16){
+            if(isStripes){
+                text.setString("Player 1-Stripes");
+                text2.setString("Player 2-Solids");
+            }
+            else{
+                text.setString("Player 1-Solids");
+                text2.setString("Player 2-Stripes");
+            }
         }
         if(turn%2) gamewindow.draw(text);
         else gamewindow.draw(text2);
@@ -313,9 +288,54 @@ int main()
             else circle.setTexture(&textures[i]);
             circle.setPosition(x[i],y[i]);
             gamewindow.draw(circle);
-            if(x[i]>914||x[i]<59||y[i]>479||y[i]<54) madeball(x,y,v,d,textures,bn,i);
+            if(x[i]>914||x[i]<59||y[i]>479||y[i]<54)
+            {
+                if(bn[i]==8)
+                {
+                    gameover=true;
+                    int str = 0;
+                    int sol = 0;
+                    for(int j=0;j<bn.size();j++)
+                    {
+                        if(bn[j]>8) str++;
+                        if(0<bn[j]<8) sol++;
+                    }
+                    if((turn-1)%2)
+                    {
+                        if(isStripes)
+                        {
+                            if(str==0) winner = "Stripes";
+                            else winner = "Solids";
+                        }
+                        else
+                        {
+                            if(sol==0) winner = "Solids";
+                            else winner = "Stripes";
+                        }
+                    }
+                    else
+                    {
+                        if(isStripes)
+                        {
+                            if(sol==0) winner = "Solids";
+                            else winner = "Stripes";
+                        }
+                        else
+                        {
+                            if(str==0) winner = "Stripes";
+                            else winner = "Solids";
+                        }
+                    }
+                }
+                madeball(x,y,v,d,textures,bn,i,turn,isStripes);
+            }
         }
-
+        if(gameover)
+        {
+            sf::Text text(winner+" Wins!",font,30);
+            text.move(350,260);
+            gamewindow.draw(text);
+        }
         gamewindow.display();
     }
     return 0;
